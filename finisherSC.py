@@ -48,6 +48,8 @@ parser.add_argument('-o', '--mapcontigs', help='Maps new contigs to old contigs(
 parser.add_argument('-f', '--fast', help= 'Fast aligns contigs (input is True)', required=False)
 parser.add_argument('-par', '--parallel', help= 'Fast aligns contigs (input is maximum number of threads)', required=False)
 parser.add_argument('-l', '--large', help= 'Large number of contigs/large size of contigs (input is True)', required=False)
+parser.add_argument('-r', '--numreffiles', help='Split MUMmer reference file into n parts (default is 10)', required=False)
+parser.add_argument('-q', '--numqueryfiles', help='Split MUMmer query file into n parts (default is 10)', required=False)
 
 
 args = vars(parser.parse_args())
@@ -70,6 +72,19 @@ if args['large'] == "True":
     houseKeeper.globalLarge = True
 else:
     houseKeeper.globalLarge = False
+
+#Allow for the reference files for MUMmer to be split into a custom number of parts to control memory usage:
+#Note: Per Adam Phillippy, the suffix tree built for the reference in MUMmer requires, as a rule of thumb,
+# 17 bytes per base
+if args['numreffiles'] != None:
+    houseKeeper.globalNumRefFiles = int(args['numreffiles'])
+else:
+    houseKeeper.globalNumRefFiles = 10
+
+if args['numqueryfiles'] != None:
+    houseKeeper.globalNumQueryFiles = int(args['numqueryfiles'])
+else:
+    houseKeeper.globalNumQueryFiles = 10
 
 
 if pathExists:

@@ -74,6 +74,7 @@ def showCoorMummer(specialForRaw, mummerLink, folderName, outputName, specialNam
     os.system(command)
 
 
+#Defunct method?
 def combineMultipleCoorMum(specialForRaw, mummerLink, folderName, outputName, specialName, numberOfFiles):
     print ""
     for dummyI in range(1, numberOfFiles + 1):
@@ -132,7 +133,9 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
         '''
         p = Pool(nProc)
         results = []
-        numberOfFiles = 10
+        numberRefFiles = houseKeeper.globalNumRefFiles
+        numberQueryFiles = houseKeeper.globalNumQueryFiles
+#        numberOfFiles = 10
         
         for eachitem in workerList:
             print eachitem
@@ -140,7 +143,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
         
             
             bindir =  os.path.abspath(os.path.dirname(sys.argv[0]))   
-            command = bindir + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + folderName + referenceName
+            command = bindir + "/fasta-splitter.pl --n-parts " + str(numberRefFiles) + " " + folderName + referenceName
             os.system(command)
             
 
@@ -149,14 +152,14 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             else:
                 queryNameMod = folderName + queryName
 
-            command = bindir + "/fasta-splitter.pl --n-parts " + str(numberOfFiles) + " " + queryNameMod
+            command = bindir + "/fasta-splitter.pl --n-parts " + str(numberQueryFiles) + " " + queryNameMod
             os.system(command)
         
             
         for eachitem in workerList:   
             outputName, referenceName, queryName, specialName = eachitem[0], eachitem[1], eachitem[2] , eachitem[3]
-            for i in range(1, numberOfFiles+1):
-                for j in range(1, numberOfFiles+1):
+            for i in range(1, numberRefFiles+1):
+                for j in range(1, numberQueryFiles+1):
                     if specialForRaw : 
                         tmpRefName , tmpQryName = referenceName[0:-6] + ".part-" + zeropadding(i) +".fasta",  queryName[0:-6] + "-" + zeropadding(j) + ".fasta"
                     else:
@@ -182,8 +185,8 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             command = mummerLink + "show-coords -r " + tmpName + "| head -5 > " + outNameMod
             os.system(command)
             
-            for i in range(1, numberOfFiles+1):
-                for j in range(1, numberOfFiles+1):
+            for i in range(1, numberRefFiles+1):
+                for j in range(1, numberQueryFiles+1):
                     
                     tmpName = folderName + outputName +zeropadding(i)+zeropadding(j) + ".delta"
                     command = mummerLink + "show-coords -r " + tmpName + "| tail -n+6 >> " + outNameMod

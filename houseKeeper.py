@@ -4,6 +4,8 @@ import sys
 globalFast = False
 globalParallel = 1
 globalLarge = False
+globalNumRefFiles = 10
+globalNumQueryFiles = 10
 
 
 def quastEvaluate(folderName, quastLink, originalName, improvedNameList, referenceName):
