@@ -113,6 +113,8 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
     # Format for workerList : [[outputName, referenceName, queryName, specialName]... ]
     # nProc : a parameter on how many threads should be created each time
     # Goal : parallelize this part  
+    
+    
     if not houseKeeper.globalLarge:
         p = Pool(processes=nProc)
         results = []
@@ -140,7 +142,13 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
         for eachitem in workerList:
             print eachitem
             outputName, referenceName, queryName, specialName = eachitem[0], eachitem[1], eachitem[2] , eachitem[3]
-        
+            #Workaround for MUMmering a file against itself when splitting reference and query into different
+            #numbers of parts:
+            if referenceName == queryName: #If MUMming a file against itself
+                #Make a symlink to the input file to act as a query file for splitting:
+                symQueryName = queryName.replace(".fasta", "-symlink.fasta")
+                os.symlink(queryName, symQuerName)
+                queryName = symQueryName
             
             bindir =  os.path.abspath(os.path.dirname(sys.argv[0]))   
             command = bindir + "/fasta-splitter.pl --n-parts " + str(numberRefFiles) + " " + folderName + referenceName
@@ -158,6 +166,12 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             
         for eachitem in workerList:   
             outputName, referenceName, queryName, specialName = eachitem[0], eachitem[1], eachitem[2] , eachitem[3]
+            #Workaround for MUMmering a file against itself when splitting reference and query into different
+            #numbers of parts:
+            if referenceName == queryName: #If MUMming a file against itself
+                #Use the symlink to the input file:
+                queryName = queryName.replace(".fasta", "-symlink.fasta")
+                
             for i in range(1, numberRefFiles+1):
                 for j in range(1, numberQueryFiles+1):
                     if specialForRaw : 
@@ -191,6 +205,9 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                     tmpName = folderName + outputName +zeropadding(i)+zeropadding(j) + ".delta"
                     command = mummerLink + "show-coords -r " + tmpName + "| tail -n+6 >> " + outNameMod
                     os.system(command)
+      #Should we be deleting all the split files after collating all the delta files together?
+      #It might be a good idea to reduce the clutter in the working directory.
+      #Perhaps also delete the partial delta files after successful concatenation.
         
 
 def transformCoor(dataList):
