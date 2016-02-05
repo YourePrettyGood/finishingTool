@@ -147,7 +147,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             if referenceName == queryName: #If MUMming a file against itself
                 #Make a symlink to the input file to act as a query file for splitting:
                 symQueryName = queryName.replace(".fasta", "-symlink.fasta")
-                os.symlink(queryName, symQuerName)
+                os.symlink(queryName, symQueryName)
                 queryName = symQueryName
             
             bindir =  os.path.abspath(os.path.dirname(sys.argv[0]))   
