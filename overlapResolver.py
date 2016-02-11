@@ -32,6 +32,7 @@ def fetchSuccessor(folderName , mummerLink):
     left_connect, right_connect = [], [] 
         
     print "Direct greedy"
+    print "fetchSuccessor: Aligning non-contained contigs to themselves, output files are greedy*.delta"
     numberOfContig, dataSet = IORobot.obtainLinkInfo(folderName, mummerLink, "noEmbed", "greedy")
     # [next_item, overlap_length]
     
@@ -40,6 +41,7 @@ def fetchSuccessor(folderName , mummerLink):
     
     dataSet.sort(reverse=True, key=itemgetter(1))
     
+    print "fetchSuccessor: Finding best successors"
     for key, items in groupby(dataSet, itemgetter(1)):
         # if key == "Contig217_d":
         #    print "dddd"
@@ -73,6 +75,7 @@ def fetchSuccessor(folderName , mummerLink):
 
     dataSet.sort(reverse=True, key=itemgetter(2))
     
+    print "fetchSuccessor: Finding best predecessors"
     for key, items in groupby(dataSet, itemgetter(2)):
 
         maxVal = -1
@@ -103,6 +106,7 @@ def fetchSuccessor(folderName , mummerLink):
         leftConnect[suffixContig][1] = lengthOfOverlap
     
     
+    print "fetchSuccessor: Outputting best successors to rightConnect.txt"
     # ## Write to file: 
     f = open(folderName + 'rightConnect.txt', 'w')
     for eachitem, dummyIndex in zip(rightConnect, range(len(rightConnect))):
@@ -110,6 +114,7 @@ def fetchSuccessor(folderName , mummerLink):
         
     f.close()
     
+    print "fetchSuccessor: Outputting best predecessors to leftConnect.txt"
     f = open(folderName + 'leftConnect.txt', 'w')
     for eachitem, dummyIndex in zip(leftConnect, range(len(leftConnect))):
         f.write(str(dummyIndex) + ',' + str(eachitem[0]) + ',' + str(eachitem[1]) + '\n')
@@ -124,13 +129,16 @@ def formSeqGraph(folderName , mummerLink):
     print "formSeqGraph" 
     startList, graphNodes = [], []
     
+    print "formSeqGraph: Reading in best successors and predecessors"
     rightConnect = readConnectList(folderName, "rightConnect.txt")
     leftConnect = readConnectList(folderName, "leftConnect.txt")
     
     numberOfNodes = len(rightConnect)
     
+    print "formSeqGraph: Initializing seqGraph"
     G = graphLib.seqGraph(numberOfNodes)
         
+    print "formSeqGraph: Adding edges to seqGraph"
     for eachitem, i  in zip(rightConnect, range(len(rightConnect))):
         index = i
         connector, weight = eachitem
@@ -144,6 +152,7 @@ def formSeqGraph(folderName , mummerLink):
 
     G.cleanEdge()
     G.condense()
+    print "formSeqGraph: Outputting seqGraph to condensedGraph.txt"
     G.saveToFile(folderName, "condensedGraph.txt")
     G.checkSelfLoops()
     G.checkCompleteness()
@@ -160,6 +169,7 @@ def formSeqGraph(folderName , mummerLink):
     outContigFile = "improved.fasta"
     outOpenList = "openZone.txt"
     
+    print "formSeqGraph: Outputting improved contigs from seqGraph to improved.fasta"
     IORobot.readContigOut(folderName, mummerLink, graphFileName, contigFile, outContigFile, outOpenList)
    
 

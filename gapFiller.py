@@ -15,10 +15,12 @@ def fillGap(folderName , mummerLink):
     # ## add it the functionality of checking filtered list V 
     # ## testing 
     
+    print "fillGap formRelatedReadsFile"
     formRelatedReadsFile(folderName, mummerLink)
     os.system("cp raw_reads.part* "+ folderName)
     os.system("rm raw_reads.part*")
     
+    print "fillGap extractEdgeSet"
     extractEdgeSet(folderName, mummerLink)
     os.system("cp relatedReads_Double.part* "+ folderName)
     os.system("rm relatedReads_Double.part*")
@@ -136,6 +138,7 @@ def formRelatedReadsFile(folderName, mummerLink):
     
     
     if True:
+        print "gapFiller formRelatedReadsFile: Aligning "+str(thres)+"bp tips of contigs to raw reads"
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,True)
         
         # alignerRobot.useMummerAlign(mummerLink, folderName, "out", "improvedTrunc.fasta", "raw_reads.part-" + indexOfMum + ".fasta", True, "fromMum" + indexOfMum )
@@ -149,6 +152,7 @@ def formRelatedReadsFile(folderName, mummerLink):
         '''
         
 
+    print "gapFiller formRelatedReadsFile: Determining associated reads"
     for dummyI in range(1, numberOfFiles + 1):
         indexOfMum = ""
         if dummyI < 10:
@@ -190,6 +194,7 @@ def formRelatedReadsFile(folderName, mummerLink):
     # print "assoiatedReadIndex", assoiatedReadIndex
     
     ckIndex = 0
+    print "gapFiller formRelatedReadsFile: Outputting associated reads to associatedNames.txt"
     f = open(folderName + "associatedNames.txt", 'w')
     oneItem = 0
     keyFound = []
@@ -284,6 +289,7 @@ def extractEdgeSet(folderName, mummerLink, option="nopolish"):
         
         
     if True:
+        print "fillGap extractEdgeSet: Aligning related reads to truncated improved contigs (smaller_improvedContig.fasta), outputting to outGapFillRefine*.delta files"
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, workerList, houseKeeper.globalParallel ,True)
         
         # alignerRobot.useMummerAlign(mummerLink, folderName, "outRefine", "smaller_improvedContig.fasta", "relatedReads_Double.part-" + indexOfMum + ".fasta", True,  "fromMumRefine" + indexOfMum)
@@ -485,6 +491,7 @@ def writeContigReadCombine(blockedSet, dataSet, folderName, rawReadList, numberO
     # ## end output blocked pairs stored
     
 
+    print "fillGap extractEdgeSet writeContigReadCombine: Outputting improved contigs to improved2.fasta"
     fImproved = open(folderName + "improved2.fasta", 'w')
     
     for eachcontig, dummyIndex in zip(finalList, range(len(finalList))):

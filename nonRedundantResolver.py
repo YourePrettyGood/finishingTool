@@ -13,10 +13,12 @@ def removeEmbedded(folderName , mummerLink):
     os.system("cp " + folderName + "contigs2.fasta " + folderName + "contigs.fasta") 
 
     if True:
+        print "removeEmbedded: Aligning contigs.fasta to contigs.fasta, outputs are self*.delta"
         alignerRobot.useMummerAlignBatch(mummerLink, folderName, [["self", "contigs.fasta", "contigs.fasta", ""]], houseKeeper.globalParallel )
         # alignerRobot.useMummerAlign(mummerLink, folderName, "self", "contigs.fasta", "contigs.fasta")
         # outputName, referenceName, queryName, specialName
     
+    print "removeEmbedded: Extracting MUMmer data from delta files to selfOut"
     dataList = alignerRobot.extractMumData(folderName, "selfOut")
     
     dataList = alignerRobot.transformCoor(dataList)
@@ -50,5 +52,6 @@ def removeEmbedded(folderName , mummerLink):
             nameList.remove(eachitem)
     print len(nameList)
     
+    print "removeEmbedded: Outputting non-contained contigs to noEmbed.fasta"
     IORobot.putListToFileO(folderName, "contigs.fasta", "noEmbed", nameList)
 

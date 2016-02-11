@@ -42,12 +42,14 @@ def xPhased(folderName , mummerLink):
     # 4. Transform graph by identifying 1 successor/predecessor case ; Condense(important);
     # 5. Read out contigs
     
+    print "xPhased: Aligning improved2.fasta against itself, outputting to mb*.delta"
     numberOfContig, dataSet = IORobot.obtainLinkInfo(folderName, mummerLink, "improved2", "mb")
     
     lenDic = IORobot.obtainLength(folderName, "improved2_Double.fasta")
     
     confidenLenThres = 0 
     
+    print "xPhased: Building seqGraph"
     G = graphLib.seqGraph(numberOfContig)
     extraEdges = loadEdgeFromBlockedReads(folderName)
     
@@ -85,12 +87,14 @@ def xPhased(folderName , mummerLink):
     G.MBResolve()
     G.reportEdge()
     
+    print "xPhased: Saving condensed seqGraph to condensedGraphMB.txt"
     G.saveToFile(folderName, "condensedGraphMB.txt")
     graphFileName = "condensedGraphMB.txt"
     contigFile = "improved2_Double.fasta"
     outContigFile = "improved3.fasta"
     outOpenList = "openZoneMB.txt"
     
+    print "xPhased: Outputting improved contigs from condensed seqGraph to improved3.fasta"
     IORobot.readContigOut(folderName, mummerLink, graphFileName, contigFile, outContigFile, outOpenList)
     
     

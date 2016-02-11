@@ -16,21 +16,27 @@ def mainFlow(folderName , mummerLink, pickupname, mapcontigsname):
     
     
     if not pickupname in ["noEmbed.fasta", "improved.fasta", "improved2.fasta"]:
+        print "NonRedundantResolver RemoveEmbedded"
         nonRedundantResolver.removeEmbedded(folderName , mummerLink)
      
     if not pickupname in ["improved.fasta", "improved2.fasta"]:
+        print "OverlapResolver FetchSuccessor"
         overlapResolver.fetchSuccessor(folderName , mummerLink)
+        print "OverlapResolver FormSeqGraph"
         overlapResolver.formSeqGraph(folderName , mummerLink)
     
     if not pickupname in ["improved2.fasta"]:
+        print "GapFiller FillGap"
         gapFiller.fillGap(folderName , mummerLink)
     
+    print "TwoRepeatOneBridgeSolver XPhased"
     twoRepeatOneBridgeSolver.xPhased(folderName , mummerLink)
     
     # ECReduction(folderName , mummerLink )
     # compareWithReference(folderName , mummerLink)
     
     if mapcontigsname != None:
+        print "HouseKeeper PerformMapping"
         houseKeeper.performMapping(folderName, mummerLink, mapcontigsname)
         
     print "<3 Do cool things that matter <3"
@@ -88,6 +94,17 @@ else:
 
 
 if pathExists:
+    print "Input parameters:"
+    print "Fast?: " + str(houseKeeper.globalFast)
+    print "Number of CPU cores: " + str(houseKeeper.globalParallel)
+    print "Large genome?: " + str(houseKeeper.globalLarge)
+    print "Split MUMmer reference into how many files?: " + str(houseKeeper.globalNumrefFiles)
+    print "Split MUMmer query into how many files?: " + str(houseKeeper.globalNumQueryFiles)
+    print "MUMmer path: " + newMummerLink
+    print "Working directory: " + newFolderName
+    print "Pick up from which step?: " + args['pickup']
+    print "Map new contigs to old contigs?: " + args['mapcontigs']
+    print "Split raw reads into how many files?: " + str(max(20, houseKeeper.globalParallel))
     mainFlow(newFolderName, newMummerLink, args['pickup'], args['mapcontigs'])
 else:
     print "Sorry. The above folders or files are missing. If you continue to have problems, please contact me(Ka-Kit Lam) at kklam@eecs.berkeley.edu"
