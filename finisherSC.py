@@ -102,8 +102,8 @@ if pathExists:
     print "Split MUMmer query into how many files?: " + str(houseKeeper.globalNumQueryFiles)
     print "MUMmer path: " + newMummerLink
     print "Working directory: " + newFolderName
-    print "Pick up from which step?: " + args['pickup']
-    print "Map new contigs to old contigs?: " + args['mapcontigs']
+    print "Pick up from which step?: " + str(args['pickup'])
+    print "Map new contigs to old contigs?: " + str(args['mapcontigs'])
     print "Split raw reads into how many files?: " + str(max(20, houseKeeper.globalParallel))
     mainFlow(newFolderName, newMummerLink, args['pickup'], args['mapcontigs'])
 else:
