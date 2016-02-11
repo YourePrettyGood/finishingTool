@@ -98,7 +98,7 @@ if pathExists:
     print "Fast?: " + str(houseKeeper.globalFast)
     print "Number of CPU cores: " + str(houseKeeper.globalParallel)
     print "Large genome?: " + str(houseKeeper.globalLarge)
-    print "Split MUMmer reference into how many files?: " + str(houseKeeper.globalNumrefFiles)
+    print "Split MUMmer reference into how many files?: " + str(houseKeeper.globalNumRefFiles)
     print "Split MUMmer query into how many files?: " + str(houseKeeper.globalNumQueryFiles)
     print "MUMmer path: " + newMummerLink
     print "Working directory: " + newFolderName
