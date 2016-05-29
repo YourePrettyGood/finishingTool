@@ -6,6 +6,8 @@ globalParallel = 1
 globalLarge = False
 globalNumRefFiles = 10
 globalNumQueryFiles = 10
+globalUseSlurm = False
+globalSlurmParams = ""
 
 
 def quastEvaluate(folderName, quastLink, originalName, improvedNameList, referenceName):

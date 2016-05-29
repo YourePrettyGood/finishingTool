@@ -3,6 +3,8 @@ import sys
 import houseKeeper
 from multiprocessing import Pool
 import time
+#For SLURM task array blocking until completion (detected by sentinel file):
+import fcntl
 
 def extractMumData(folderName, fileName):
     # "Format of the dataList :  1      765  |    11596    10822  |      765      775  |    84.25  | ref_NC_001133_       scf7180000000702"
@@ -162,6 +164,9 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
 
             command = bindir + "/fasta-splitter.pl --n-parts " + str(numberQueryFiles) + " " + queryNameMod
             os.system(command)
+            
+        if houseKeeper.globalUseSlurm == True:
+            os.mkdir('locks')
         
             
         for eachitem in workerList:   
@@ -172,18 +177,68 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 #Use the symlink to the input file:
                 queryName = queryName.replace(".fasta", "-symlink.fasta")
                 
-            for i in range(1, numberRefFiles+1):
-                for j in range(1, numberQueryFiles+1):
-                    if specialForRaw : 
-                        tmpRefName , tmpQryName = referenceName[0:-6] + ".part-" + zeropadding(i) +".fasta",  queryName[0:-6] + "-" + zeropadding(j) + ".fasta"
-                    else:
-                        tmpRefName , tmpQryName = referenceName[0:-6] + ".part-" + zeropadding(i) +".fasta",  queryName[0:-6] + ".part-" + zeropadding(j) + ".fasta"
+            if houseKeeper.globalUseSlurm == True:
+                if houseKeeper.globalFast:
+                    nucmer_fast_option = "-b 50 "
+                else:
+                    nucmer_fast_option = ""
                     
-                    results.append(p.apply_async(nucmerMummer, args =(specialForRaw, mummerLink, "", folderName + outputName +zeropadding(i)+zeropadding(j), tmpRefName, tmpQryName, refinedVersion)))
+                if refinedVersion:
+                    nucmer_fast_option = ""
+                    nucmer_refined_option = "-l 10 "
+                else:
+                    nucmer_refined_option = ""
+                    
+                slurmscript = open(outputName+'_mummer_slurm.sh', 'w')
+                slurmscript.write('#!/bin/bash\n')
+                slurmscript.write('ID=$SLURM_ARRAY_TASK_ID\n')
+                slurmscript.write('PADDEDID=$(printf %02d ${ID})')
+                slurmscript.write('exec 100>locks/${ID}\n')
+                slurmscript.write('flock 100\n')
+                slurmscript.write('REF="'+referenceName[0:-6]+'.part-${PADDEDID}.fasta"\n')
+                slurmscript.write('for QUERYID in {01..'+str(numberQueryFiles)+'}\n')
+                slurmscript.write('   do')
+                if specialForRaw:
+                    slurmscript.write('QUERY="'+queryName[0:-6]+'-${QUERYID}.fasta"\n')
+                else:
+                    slurmscript.write('QUERY="'+queryName[0:-6]+'.part-${QUERYID}.fasta"\n')
+                    
+                slurmscript.write('   '+mummerLink+'nucmer '+nucmer_refined_option+nucmer_fast_option+'--maxmatch -p '+folderName+outputName+'${PADDEDID}${QUERYID} ${REF} ${QUERY}')
+                slurmscript.write('done\n')
+                slurmscript.write('flock -u 100\n')
+                slurmscript.close()
+                command = 'sbatch --array=1-'+str(numberRefFiles)+houseKeeper.globalSlurmParams+' '+outputName+'_mummer_slurm.sh'
+                os.system(command)
+            else:
+                for i in range(1, numberRefFiles+1):
+                    for j in range(1, numberQueryFiles+1):
+                        if specialForRaw : 
+                            tmpRefName , tmpQryName = referenceName[0:-6] + ".part-" + zeropadding(i) +".fasta",  queryName[0:-6] + "-" + zeropadding(j) + ".fasta"
+                        else:
+                            tmpRefName , tmpQryName = referenceName[0:-6] + ".part-" + zeropadding(i) +".fasta",  queryName[0:-6] + ".part-" + zeropadding(j) + ".fasta"
+                    
+                        results.append(p.apply_async(nucmerMummer, args =(specialForRaw, mummerLink, "", folderName + outputName +zeropadding(i)+zeropadding(j), tmpRefName, tmpQryName, refinedVersion)))
+      
       
         
-        outputlist = [itemkk.get() for itemkk in results]
-        print len(outputlist)
+        if houseKeeper.globalUseSlurm == True:
+            #Wait for the sentinel files to release their locks:
+            num_done = 0
+            lockfiles = os.listdir('locks')
+            for lockfile in lockfiles:
+                current_lock = open('locks/'+lockfile, 'rb')
+                flock(current_lock, fcntl.LOCK_EX)
+                flock(current_lock, fcntl.LOCK_UN)
+                current_lock.close()
+                os.unlink('locks/'+lockfile)
+                num_done++
+            
+            os.rmdir('locks')
+            print num_done
+        else:
+            outputlist = [itemkk.get() for itemkk in results]
+            print len(outputlist)
+        
         p.close()
         
         for eachitem in workerList:
