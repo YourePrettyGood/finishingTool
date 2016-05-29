@@ -231,7 +231,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 flock(current_lock, fcntl.LOCK_UN)
                 current_lock.close()
                 os.unlink('locks/'+lockfile)
-                num_done++
+                num_done += 1
             
             os.rmdir('locks')
             print num_done
