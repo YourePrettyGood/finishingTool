@@ -193,11 +193,11 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 slurmscript.write('#!/bin/bash\n')
                 slurmscript.write('ID=$SLURM_ARRAY_TASK_ID\n')
                 slurmscript.write('PADDEDID=$(printf %02d ${ID})')
-                slurmscript.write('exec 100>locks/${ID}\n')
-                slurmscript.write('flock 100\n')
+                slurmscript.write('exec {lock_fd}>locks/${ID}\n')
+                slurmscript.write('flock $lock_fd\n')
                 slurmscript.write('REF="'+referenceName[0:-6]+'.part-${PADDEDID}.fasta"\n')
                 slurmscript.write('for QUERYID in {01..'+str(numberQueryFiles)+'}\n')
-                slurmscript.write('   do')
+                slurmscript.write('   do ')
                 if specialForRaw:
                     slurmscript.write('QUERY="'+queryName[0:-6]+'-${QUERYID}.fasta"\n')
                 else:
@@ -205,7 +205,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                     
                 slurmscript.write('   '+mummerLink+'nucmer '+nucmer_refined_option+nucmer_fast_option+'--maxmatch -p '+folderName+outputName+'${PADDEDID}${QUERYID} ${REF} ${QUERY}')
                 slurmscript.write('done\n')
-                slurmscript.write('flock -u 100\n')
+                slurmscript.write('flock -u $lock_fd\n')
                 slurmscript.close()
                 command = 'sbatch --array=1-'+str(numberRefFiles)+houseKeeper.globalSlurmParams+' '+outputName+'_mummer_slurm.sh'
                 os.system(command)
