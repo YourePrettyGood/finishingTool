@@ -194,7 +194,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 slurmscript.write('JOBID=$SLURM_ARRAY_JOB_ID\n')
                 slurmscript.write('ID=$SLURM_ARRAY_TASK_ID\n')
                 slurmscript.write('PADDEDID=$(printf %02d ${ID})')
-                slurmscript.write('exec 7>locks/${JOBID}\n')
+                slurmscript.write('exec 7>locks/${JOBID}_${ID}\n')
                 slurmscript.write('flock 7\n')
                 slurmscript.write('REF="'+referenceName[0:-6]+'.part-${PADDEDID}.fasta"\n')
                 slurmscript.write('for QUERYID in {01..'+str(numberQueryFiles)+'}\n')
