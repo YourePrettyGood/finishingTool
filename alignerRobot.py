@@ -167,6 +167,8 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             
         if houseKeeper.globalUseSlurm == True:
             os.mkdir('locks')
+            locks_parent_directory = os.path.abspath(os.getcwd())
+            print locks_parent_directory+'/locks/'
         
             
         for eachitem in workerList:   
@@ -193,8 +195,9 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 slurmscript.write('#!/bin/bash\n')
                 slurmscript.write('JOBID=$SLURM_ARRAY_JOB_ID\n')
                 slurmscript.write('ID=$SLURM_ARRAY_TASK_ID\n')
-                slurmscript.write('PADDEDID=$(printf %02d ${ID})')
-                slurmscript.write('exec 7>locks/${JOBID}_${ID}\n')
+                slurmscript.write('PADDEDID=$(printf %02d ${ID})\n')
+                slurmscript.write('pwd\n')
+                slurmscript.write('exec 7>'+locks_parent_directory+'/locks/${JOBID}_${ID}\n')
                 slurmscript.write('flock 7\n')
                 slurmscript.write('REF="'+referenceName[0:-6]+'.part-${PADDEDID}.fasta"\n')
                 slurmscript.write('for QUERYID in {01..'+str(numberQueryFiles)+'}\n')
@@ -225,16 +228,16 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
         if houseKeeper.globalUseSlurm == True:
             #Wait for the sentinel files to release their locks:
             num_done = 0
-            lockfiles = os.listdir('locks')
+            lockfiles = os.listdir(locks_parent_directory+'/locks')
             for lockfile in lockfiles:
-                current_lock = open('locks/'+lockfile, 'rb')
+                current_lock = open(locks_parent_directory+'/locks/'+lockfile, 'rb')
                 flock(current_lock, fcntl.LOCK_EX)
                 flock(current_lock, fcntl.LOCK_UN)
                 current_lock.close()
-                os.unlink('locks/'+lockfile)
+                os.unlink(locks_parent_directory+'/locks/'+lockfile)
                 num_done += 1
             
-            os.rmdir('locks')
+            os.rmdir(locks_parent_directory+'/locks')
             print num_done
         else:
             outputlist = [itemkk.get() for itemkk in results]
