@@ -197,6 +197,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 slurmscript.write('ID=$SLURM_ARRAY_TASK_ID\n')
                 slurmscript.write('PADDEDID=$(printf %02d ${ID})\n')
                 slurmscript.write('pwd\n')
+                slurmscript.write('[[ -e '+locks_parent_directory+'/locks/${JOBID}_${ID} ]] || touch '+locks_parent_directory+'/locks/${JOBID}_${ID}\n')
                 slurmscript.write('exec 7>'+locks_parent_directory+'/locks/${JOBID}_${ID}\n')
                 slurmscript.write('flock 7\n')
                 slurmscript.write('REF="'+referenceName[0:-6]+'.part-${PADDEDID}.fasta"\n')
