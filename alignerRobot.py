@@ -166,7 +166,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             os.system(command)
             
         if houseKeeper.globalUseSlurm == True:
-            os.mkdir('locks')
+            #os.mkdir('locks')
             locks_parent_directory = os.path.abspath(os.getcwd())
             print locks_parent_directory+'/locks/'
         
@@ -197,6 +197,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 slurmscript.write('ID=$SLURM_ARRAY_TASK_ID\n')
                 slurmscript.write('PADDEDID=$(printf %02d ${ID})\n')
                 slurmscript.write('pwd\n')
+                slurmscript.write('[[ -d '+locks_parent_directory+'/locks ]] || mkdir -p '+locks_parent_directory+'/locks\n')
                 slurmscript.write('[[ -e '+locks_parent_directory+'/locks/${JOBID}_${ID} ]] || touch '+locks_parent_directory+'/locks/${JOBID}_${ID}\n')
                 slurmscript.write('exec 7>'+locks_parent_directory+'/locks/${JOBID}_${ID}\n')
                 slurmscript.write('flock 7\n')
