@@ -100,6 +100,7 @@ else:
 #To deal with jobs that require tons of MUMmer calls, allow for SLURM task array submission:
 if args['use_slurm'] == "True":
     houseKeeper.globalUseSlurm = True
+    os.mkdir('locks')
 else:
     houseKeeper.globalUseSlurm = False
     

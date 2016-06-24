@@ -209,7 +209,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 else:
                     slurmscript.write('QUERY="'+queryName[0:-6]+'.part-${QUERYID}.fasta"\n')
                     
-                slurmscript.write('   '+mummerLink+'nucmer '+nucmer_refined_option+nucmer_fast_option+'--maxmatch -p '+folderName+outputName+'${PADDEDID}${QUERYID} ${REF} ${QUERY}')
+                slurmscript.write('   '+mummerLink+'nucmer '+nucmer_refined_option+nucmer_fast_option+'--maxmatch -p '+folderName+outputName+'${PADDEDID}${QUERYID} ${REF} ${QUERY}\n')
                 slurmscript.write('done\n')
                 slurmscript.write('flock -u 7\n')
                 slurmscript.close()
