@@ -231,6 +231,14 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             #Wait for the sentinel files to release their locks:
             num_done = 0
             lockfiles = os.listdir(locks_parent_directory+'/locks')
+            filesystem_latency = 0
+            while len(lockfiles) < numberRefFiles:
+               time.sleep(1)
+               filesystem_latency += 1
+               lockfiles = os.listdir(locks_parent_directory+'/locks')
+               
+            print "Filesystem took "+str(filesystem_latency)+" seconds to update locks directory"
+            
             for lockfile in lockfiles:
                 current_lock = open(locks_parent_directory+'/locks/'+lockfile, 'rb')
                 fcntl.flock(current_lock, fcntl.LOCK_EX)
