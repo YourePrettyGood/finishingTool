@@ -247,7 +247,6 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 os.unlink(locks_parent_directory+'/locks/'+lockfile)
                 num_done += 1
             
-            os.rmdir(locks_parent_directory+'/locks')
             print num_done
         else:
             outputlist = [itemkk.get() for itemkk in results]
