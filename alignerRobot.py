@@ -233,8 +233,8 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             lockfiles = os.listdir(locks_parent_directory+'/locks')
             for lockfile in lockfiles:
                 current_lock = open(locks_parent_directory+'/locks/'+lockfile, 'rb')
-                flock(current_lock, fcntl.LOCK_EX)
-                flock(current_lock, fcntl.LOCK_UN)
+                fcntl.flock(current_lock, fcntl.LOCK_EX)
+                fcntl.flock(current_lock, fcntl.LOCK_UN)
                 current_lock.close()
                 os.unlink(locks_parent_directory+'/locks/'+lockfile)
                 num_done += 1
