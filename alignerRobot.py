@@ -232,7 +232,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             num_done = 0
             lockfiles = os.listdir(locks_parent_directory+'/locks')
             filesystem_latency = 0
-            while len(lockfiles) < numberRefFiles:
+            while len(lockfiles) < len(workerList)*numberRefFiles:
                time.sleep(1)
                filesystem_latency += 1
                lockfiles = os.listdir(locks_parent_directory+'/locks')
