@@ -1,6 +1,7 @@
 
 import time
 import argparse
+import os
 
 import nonRedundantResolver
 import overlapResolver
