@@ -5,6 +5,8 @@ from multiprocessing import Pool
 import time
 #For SLURM task array blocking until completion (detected by sentinel file):
 import fcntl
+import subprocess
+import gc
 
 def extractMumData(folderName, fileName):
     # "Format of the dataList :  1      765  |    11596    10822  |      765      775  |    84.25  | ref_NC_001133_       scf7180000000702"
@@ -169,6 +171,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             #os.mkdir('locks')
             locks_parent_directory = os.path.abspath(os.getcwd())
             print locks_parent_directory+'/locks/'
+            jobids = []
         
             
         for eachitem in workerList:   
@@ -214,7 +217,13 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 slurmscript.write('flock -u 7\n')
                 slurmscript.close()
                 command = 'sbatch --array=1-'+str(numberRefFiles)+houseKeeper.globalSlurmParams+' '+outputName+'_mummer_slurm.sh'
-                os.system(command)
+                process_handle = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+                (process_stdout, process_stderr) = process_handle.communicate()
+                output_list = process_stdout.split()
+                jobid = output_list[3]
+                for i in range(1, numberRefFiles+1):
+                   jobids.append(jobid+'_'+i)
+                
             else:
                 for i in range(1, numberRefFiles+1):
                     for j in range(1, numberQueryFiles+1):
@@ -232,9 +241,12 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             num_done = 0
             lockfiles = os.listdir(locks_parent_directory+'/locks')
             filesystem_latency = 0
-            while len(lockfiles) < len(workerList)*numberRefFiles:
+#            while len(lockfiles) < len(workerList)*numberRefFiles:
+            while not all([True for job in jobids if job in lockfiles]):
                time.sleep(1)
                filesystem_latency += 1
+               del lockfiles
+               gc.collect()
                lockfiles = os.listdir(locks_parent_directory+'/locks')
                
             print "Filesystem took "+str(filesystem_latency)+" seconds to update locks directory"
