@@ -242,7 +242,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
             lockfiles = os.listdir(locks_parent_directory+'/locks')
             filesystem_latency = 0
 #            while len(lockfiles) < len(workerList)*numberRefFiles:
-            while not all([True for job in jobids if job in lockfiles]):
+            while sum([1 for job in jobids if job in lockfiles]) != len(jobids):
                time.sleep(1)
                filesystem_latency += 1
                del lockfiles
