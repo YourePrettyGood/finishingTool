@@ -222,7 +222,7 @@ def useMummerAlignBatch(mummerLink, folderName, workerList, nProc ,specialForRaw
                 output_list = process_stdout.split()
                 jobid = output_list[3]
                 for i in range(1, numberRefFiles+1):
-                   jobids.append(jobid+'_'+i)
+                   jobids.append(jobid+'_'+str(i))
                 
             else:
                 for i in range(1, numberRefFiles+1):
